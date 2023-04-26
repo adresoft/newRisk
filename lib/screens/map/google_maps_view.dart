@@ -23,8 +23,7 @@ import '../../risk_points/risk_points.dart';
 List<Circle> _circles = [];
 String error_message = 'Risk Noktası!';
 List<RiskPoint>? risk_points;
-var uuid = Uuid();
-var uniqueId = uuid.v4();
+
 bool completed = false;
 
 Color circleColor(traffic_accident){
@@ -96,16 +95,20 @@ class _GoogleMapsViewState extends State<GoogleMapsView> {
   Future<List<Circle>> getData() async{
     List<RiskPoint> a = [];
     String jsonString = await rootBundle.loadString('assets/json/risk_points.json');
+    jsonString = jsonString.replaceAll("&#199;", "Ç");
     List<dynamic> data = jsonDecode(jsonString);
     for (var value in data){
       RiskPoint risk_point = RiskPoint.fromJson(value);
+      var uuid = Uuid();
+      var uniqueId = uuid.v4();
       final circle = Circle(circleId: CircleId(uniqueId), center: LatLng(risk_point.xKoordinat,risk_point.yKoordinat), fillColor: circleColor(risk_point.kazaSayisi), radius: risk_point.kazaSayisi*20,
           onTap: (){
             List<KazaSekli> kaza = risk_point.kazaSekli.toList();
             riskPointBottomSheet(context, kaza);
           },
 
-          strokeWidth: 0
+          strokeWidth: 0,
+        consumeTapEvents: true
       );
       _circles.add(circle);
       a.add(risk_point);
@@ -113,21 +116,7 @@ class _GoogleMapsViewState extends State<GoogleMapsView> {
     risk_points = a;
     return _circles;
   }
-  Future<bool> addCircles(List<RiskPoint> liste) async{
-    for(RiskPoint risk_point in liste){
-      List<KazaSekli> kaza = risk_point.kazaSekli;
-      Circle circle = Circle(circleId: CircleId(uniqueId), center: LatLng(risk_point.xKoordinat,risk_point.yKoordinat), fillColor: circleColor(risk_point.kazaSayisi), radius: risk_point.kazaSayisi*20,
-          onTap: () {
-            riskPointBottomSheet(context, kaza);
-          }, consumeTapEvents: true,
-          strokeWidth: 0
 
-      );
-      _circles.add(circle);
-
-    }
-    return true;
-  }
 
   static late CameraPosition _cameraPosition = CameraPosition(
   bearing: 192.8334901395799,
