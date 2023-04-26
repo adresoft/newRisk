@@ -1,7 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
-import 'package:risk/screens/map/mapSettingsBottomSheet.dart';
+
 import 'package:risk/screens/settings/settings.dart';
 import 'package:risk/screens/more/more.dart';
 
@@ -72,7 +72,7 @@ class _AnimationFloatingActionButtonState extends State<AnimationFloatingActionB
 
   Widget mapSettings() {
     return FloatingActionButton(
-      onPressed: () => mapSettingsBottomSheet(context),
+      onPressed: null,
       tooltip: 'Map Settings',
       child: Icon(Icons.map),
     );

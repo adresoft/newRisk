@@ -13,22 +13,22 @@ class _MoreState extends State<More> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: DefaultTabController(
-        length: 5,
+
+        length: 2,
         child: Scaffold(
-          appBar: AppBar(
-            leading: IconButton(onPressed: ()=> Navigator.pop(context),icon: Icon(Icons.clear)),
-            backgroundColor: Colors.red,
-            bottom: TabBar(
-              isScrollable: true,
-              labelColor: Colors.white,
-              indicatorColor: Colors.white,
+          appBar: TabBar(
+
+            isScrollable: false,
+              labelColor: Colors.black,
+              indicatorColor: Colors.black,
+              dividerColor: Colors.red,
               tabs: [
-                Tab(icon: Icon(Icons.chat_bubble_outline), child: Text('Geri Bildirim', style: GoogleFonts.quicksand(),),),
-                Tab(icon: Icon(Icons.verified_user) ,child: Text('Kullanıcı Sözleşmesi', style: GoogleFonts.quicksand(),),),
-                Tab(icon: Icon(Icons.info_outline),child: Text('Proje Hakkında', style: GoogleFonts.quicksand(),),),
+                Tab(icon: Icon(Icons.verified_user) ,child: Text('Kullanıcı Sözleşmesi', style: GoogleFonts.rajdhani(),),),
+                Tab(icon: Icon(Icons.chat_bubble_outline), child: Text('Geri Bildirim ve İletişim', style: GoogleFonts.rajdhani(),),),
+
               ],
             ),
-          ),
+
           body: TabBarView(
 
             children: [
@@ -38,9 +38,7 @@ class _MoreState extends State<More> {
               Container(child: Column(
                 children: [Center(child: Text('Page'),)],
               )),
-              Container(child: Column(
-                children: [Center(child: Text('Page'),)],
-              )),
+
             ],
           ),
         ),

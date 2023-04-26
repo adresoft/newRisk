@@ -24,9 +24,7 @@ class RiskPoint{
     var kazaSekliList = json['kazaSekli'] as List;
 
 
-    List<KazaSekli> kazaSekli = kazaSekliList.map((kazaSekliJson) {
-      return KazaSekli.fromJson(kazaSekliJson);
-    }).toList();
+    List<KazaSekli> kazaSekli = kazaSekliList.map((i) => KazaSekli.fromJson(i)).toList();
 
     return RiskPoint(
       xKoordinat: json['xKoordinat'],
@@ -56,39 +54,3 @@ class KazaSekli {
     );
   }
 }
-
-/*
-Future<String> _loadFromAsset() async {
-  return await rootBundle.loadString('assets/risk_points.json');
-}
-Future<RiskPoint> loadData() async {
-  String jsonString = await _loadFromAsset();
-  final jsonData = json.decode(jsonString);
-  return RiskPoint.fromJson(jsonData);
-}*/
-
-Future<List<RiskPoint>> fetch(BuildContext context) async{
-  String data = await DefaultAssetBundle.of(context).loadString("assets/json/risk_points.json");
-  //final jsonResult = jsonDecode(data);
-  List<dynamic> jsonData = json.decode(data);
-  List<RiskPoint> risk_points=[];
-  jsonData.forEach((element) {
-    risk_points.add(RiskPoint.fromJson(element));
-  });
-  return risk_points;
-
-}
-void main(){
-  /*List<RiskPoint> risk_points = [];
-  loadData().then((value) {
-    risk_points = [value];
-    risk_points.forEach((element) {
-      debugPrint(element.xKoordinat.toString());
-    });
-  });*/
-
-
-
-
-}
-

@@ -25,12 +25,13 @@ class AppBarWidget extends StatelessWidget {
   const AppBarWidget({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    startListening();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        appbarContainer(),
+        appBar(context),
         SizedBox(height: 10,),
-        Row(
+        /*Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -43,8 +44,19 @@ class AppBarWidget extends StatelessWidget {
               child: dateContainer(),
             ),
           ],
-        ),
+        ),*/
       ],
+    );
+  }
+
+  CircleAvatar appBar(BuildContext context) {
+    return CircleAvatar(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Image.asset('assets/images/teknofest.png'),
+      ),
+      backgroundColor: Colors.white,
+      radius: MediaQuery.of(context).size.width/10,
     );
   }
 

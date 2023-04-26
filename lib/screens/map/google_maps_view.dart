@@ -13,7 +13,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:risk/screens/map/animationFloatingActionButton.dart';
 import 'package:risk/screens/map/appBar.dart';
-import 'package:risk/screens/map/mapSettingsBottomSheet.dart';
+
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:risk/screens/settings/settings.dart';
 import 'package:risk/risk_points/risk_points.dart';
@@ -25,6 +25,7 @@ String error_message = 'Risk Noktası!';
 List<RiskPoint>? risk_points;
 var uuid = Uuid();
 var uniqueId = uuid.v4();
+bool completed = false;
 
 Color circleColor(traffic_accident){
   if(traffic_accident <= 3){
@@ -50,11 +51,10 @@ Polygon ankara = const Polygon(
     LatLng( 39.687, 32.811),
     LatLng( 39.697, 32.639),
     LatLng( 39.756, 32.566),
-    LatLng(39.93236320706288, 32.65292041923445),
-  ],
+ ],
   strokeWidth: 2,
   strokeColor: Colors.red,
-  fillColor: Colors.white,
+  fillColor: Colors.transparent,
 );
 
 
@@ -72,7 +72,7 @@ class _GoogleMapsViewState extends State<GoogleMapsView> {
 
   Widget _buildWarning(error_message) {
     if (_showingWarning) {
-      _speak('Risk Noktasına Yaklaşıyorsunuz, Lütfen Hızınızı Düşürün!');
+      _speak(error_message);
       _showingWarning = false;
       return GestureDetector(
         onTap: () {},
@@ -84,7 +84,7 @@ class _GoogleMapsViewState extends State<GoogleMapsView> {
           margin: EdgeInsets.all(8.0),
           padding: EdgeInsets.all(8.0),
           child: Text(
-            'Risk Noktasına Yaklaşıyorsunuz, Lütfen Hızınızı Düşürün!',
+            error_message,
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -93,24 +93,40 @@ class _GoogleMapsViewState extends State<GoogleMapsView> {
       return SizedBox.shrink();
     }
   }
-  getData() async{
+  Future<List<Circle>> getData() async{
     List<RiskPoint> a = [];
     String jsonString = await rootBundle.loadString('assets/json/risk_points.json');
     List<dynamic> data = jsonDecode(jsonString);
-    data.forEach((value) {
-      a.add(RiskPoint.fromJson(value));
-    });
-    risk_points = a;
+    for (var value in data){
+      RiskPoint risk_point = RiskPoint.fromJson(value);
+      final circle = Circle(circleId: CircleId(uniqueId), center: LatLng(risk_point.xKoordinat,risk_point.yKoordinat), fillColor: circleColor(risk_point.kazaSayisi), radius: risk_point.kazaSayisi*20,
+          onTap: (){
+            List<KazaSekli> kaza = risk_point.kazaSekli.toList();
+            riskPointBottomSheet(context, kaza);
+          },
 
-    for(RiskPoint risk_point in risk_points!){
-      debugPrint(risk_point.xKoordinat.toString());
-      final circle = Circle(circleId: CircleId(uniqueId), center: LatLng(risk_point.xKoordinat,risk_point.yKoordinat), fillColor: circleColor(risk_point.kazaSayisi), radius: 20,
+          strokeWidth: 0
       );
       _circles.add(circle);
+      a.add(risk_point);
     }
+    risk_points = a;
+    return _circles;
+  }
+  Future<bool> addCircles(List<RiskPoint> liste) async{
+    for(RiskPoint risk_point in liste){
+      List<KazaSekli> kaza = risk_point.kazaSekli;
+      Circle circle = Circle(circleId: CircleId(uniqueId), center: LatLng(risk_point.xKoordinat,risk_point.yKoordinat), fillColor: circleColor(risk_point.kazaSayisi), radius: risk_point.kazaSayisi*20,
+          onTap: () {
+            riskPointBottomSheet(context, kaza);
+          }, consumeTapEvents: true,
+          strokeWidth: 0
 
-    setState(() {
-    });
+      );
+      _circles.add(circle);
+
+    }
+    return true;
   }
 
   static late CameraPosition _cameraPosition = CameraPosition(
@@ -123,7 +139,11 @@ class _GoogleMapsViewState extends State<GoogleMapsView> {
   @override
   void initState() {
     super.initState();
-    getData();
+    getData().then((value) {
+      setState(() {
+        completed = true;
+      });
+    });
     flutterTts = FlutterTts();
     _getCurrentLocation();
     _positionStream = Geolocator.getPositionStream().listen((position) {
@@ -150,7 +170,7 @@ class _GoogleMapsViewState extends State<GoogleMapsView> {
           return AlertDialog(
             titleTextStyle: GoogleFonts.rajdhani(color: Colors.black),
             icon: Icon(Icons.error_outline, color: Colors.black,),
-            title: Text('Lütfen Konum Hizmetlerine İzin Verin!'),
+            title: Text('Lütfen Konum Hizmetlerine İzin Verin!', style: GoogleFonts.rajdhani(),),
           );
         },
       );
@@ -169,7 +189,7 @@ class _GoogleMapsViewState extends State<GoogleMapsView> {
             return AlertDialog(
               titleTextStyle: GoogleFonts.rajdhani(color: Colors.black),
               icon: Icon(Icons.error_outline, color: Colors.black,),
-              title: Text('Uygulamayı Kullanabilmeniz için konum verilerine izin vermiş olmanız gerekmektedir'),
+              title: Text('Uygulamayı Kullanabilmeniz için konum verilerine izin vermiş olmanız gerekmektedir', style: GoogleFonts.rajdhani(),),
             );
           },
         );
@@ -182,7 +202,8 @@ class _GoogleMapsViewState extends State<GoogleMapsView> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Lütfen Ayarlardan Konum Hizmetlerine İzin Verin!'),
+            icon: Icon(Icons.info_outline, color: Colors.black,),
+            title: Text('Lütfen Ayarlardan Konum Hizmetlerine İzin Verin!', style: GoogleFonts.rajdhani(),),
           );
         },
       );
@@ -261,48 +282,67 @@ class _GoogleMapsViewState extends State<GoogleMapsView> {
 
 
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Stack(
-          children: [
-            GoogleMap(
-              compassEnabled: true,
-              indoorViewEnabled: true,
-              mapToolbarEnabled: true,
-              rotateGesturesEnabled: true,
-              tiltGesturesEnabled: true,
-              zoomControlsEnabled: true,
-              zoomGesturesEnabled: true,
-              buildingsEnabled: true,
-              trafficEnabled: traffic,
-              mapType: mapType,
-              initialCameraPosition: _cameraPosition,
-              myLocationButtonEnabled: true,
-              myLocationEnabled: true,
-              onMapCreated: (map){},
-              polygons: {ankara},
-              circles: Set.from(_circles),
-            ),
-            const Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: EdgeInsets.all(8.0),
-                child: AppBarWidget(),
+    if(completed){
+      return SafeArea(
+        child: Scaffold(
+          body: Stack(
+            children: [
+              GoogleMap(
+                compassEnabled: false,
+                indoorViewEnabled: true,
+                mapToolbarEnabled: true,
+                rotateGesturesEnabled: true,
+                tiltGesturesEnabled: true,
+                zoomControlsEnabled: true,
+                zoomGesturesEnabled: true,
+                buildingsEnabled: true,
+                trafficEnabled: traffic,
+                mapType: mapType,
+                initialCameraPosition: _cameraPosition,
+                myLocationButtonEnabled: true,
+                myLocationEnabled: true,
+                scrollGesturesEnabled: true,
+                onMapCreated: (map){},
+                polygons: {ankara},
+                circles: Set.from(_circles),
               ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: _buildWarning(error_message),
+              const Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: AppBarWidget(),
+                ),
               ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: _buildWarning(error_message),
+                ),
               ),
-          ],
-        ),
-        floatingActionButton: const AnimationFloatingActionButton(),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Container(
+                    padding: EdgeInsets.all(12.0),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3.0),
+                        color: Colors.white.withOpacity(0.7)
+                    ),
+                    child: Text(speed.round().toString(), style: GoogleFonts.rajdhani(fontWeight: FontWeight.bold),),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // floatingActionButton: const AnimationFloatingActionButton(),
 
-      ),
-    );
+        ),
+      );
+    }else{
+      return Container();
+    }
   }
 
 

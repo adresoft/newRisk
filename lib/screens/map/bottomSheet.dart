@@ -1,35 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:risk/risk_points/risk_points.dart';
 
 
-void riskPointBottomSheet(BuildContext context) {
+riskPointBottomSheet(BuildContext context, List<KazaSekli> kazaSekilleri){
+  kazaSekilleri.forEach((element) {
+    debugPrint(element.kazaTipi);
+  });
+  debugPrint("//////////////");
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return Container(
-        child: ListView(
+        child: Center(
+          child: ListView(
           children: <Widget>[
-            ListTile(
-              leading: Icon(Icons.location_on_outlined, color: Colors.black,),
-              title: Text('Hasanoğlan Bahçelievler, 06850 Elmadağ/Ankara'+' '+'', style: GoogleFonts.rajdhani(),),
-            ),
+            ListTile(leading: Icon(Icons.info_outline, color: Colors.black,), title: Text('Risk Noktası', style: GoogleFonts.rajdhani(fontWeight: FontWeight.bold),)),
+          //  Row(children: [Text(x.toString(), style: GoogleFonts.rajdhani(color: Colors.indigo),),Text(y.toString(), style: GoogleFonts.rajdhani(color: Colors.indigo),),],),
+            const Divider(color: Colors.black,),
             ListTile(
               leading: Icon(Icons.emergency_share_rounded, color: Colors.black,),
               title: Text('Kaza Sebepleri', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('%54 Kaza Sebep 1', style: GoogleFonts.rajdhani(),),
-                  Text('%31 Kaza Sebep 2', style: GoogleFonts.rajdhani(),),
-                  Text('%10 Kaza Sebep 3', style: GoogleFonts.rajdhani(),),
-                  Text('%54 Kaza Sebep 4', style: GoogleFonts.rajdhani(),),
-                ],
-              ),
+              subtitle: ListView.builder(shrinkWrap: true,itemBuilder: (context, index) => ListTile(leading: Text('% ${kazaSekilleri[index].yuzde}', style: GoogleFonts.rajdhani(),), title: Text('${kazaSekilleri[index].kazaTipi}',style: GoogleFonts.rajdhani(),), trailing: Text('${kazaSekilleri[index].adet}', style: GoogleFonts.rajdhani(),)), itemCount: kazaSekilleri.length),
             ),
             ListTile(
               leading: Icon(Icons.ac_unit, color: Colors.grey,),
               title: Text('Kazaların Yaşandığı Tarihler', style: GoogleFonts.quicksand(color: Colors.grey),),
-            trailing: Text('Çok Yakında!', style: GoogleFonts.quicksand(color: Colors.red),),
+              trailing: Text('Çok Yakında!', style: GoogleFonts.quicksand(color: Colors.red),),
             ),
             ListTile(
               leading: Icon(Icons.access_time_outlined, color: Colors.grey,),
@@ -42,6 +39,7 @@ void riskPointBottomSheet(BuildContext context) {
               trailing: Text('Çok Yakında!', style: GoogleFonts.quicksand(color: Colors.red),),
             ),
           ],
+        ),
         ),
       );
     },
